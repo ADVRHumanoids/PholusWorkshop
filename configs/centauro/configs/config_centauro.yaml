@@ -26,14 +26,9 @@ RobotInterfaceXBotRT:
   subclass_factory_name: "robot_interface_xbot_rt"
 
 XBotRTPlugins:
-  #plugins: ["ExoskeletonCommunicationPlugin", "TwoPriorityRtIkPlugin"]
-  #plugins: ["ExoskeletonCommunicationPlugin", "HomingExample"]
-  #plugins: ["HomingExample", "IkRosSharedMemoryPublisher", "OpenSotIk"]
-  plugins: ["HomingExample"]
+  plugins: ["HomingExample", "PholusPlugin"]
   io_plugins: []
-  #io_plugins: ["IkRosIo"]
-  #plugins: ["ExoskeletonCommunicationPlugin"]
-  #plugins: ["PlayJointSpaceDemo"] #, "TwoPriorityRtIkPlugin"]
+
 
 MasterCommunicationInterface:
   framework_name: "ROS"

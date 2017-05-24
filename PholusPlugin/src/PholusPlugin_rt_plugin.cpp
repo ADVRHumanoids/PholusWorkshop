@@ -39,8 +39,12 @@ bool PholusPlugin::init_control_plugin(std::string path_to_config_file,
     /* Initialize a logger which saves to the specified file. Remember that
      * the current date/time is always appended to the provided filename,
      * so that logs do not overwrite each other. */
-    
+
     _logger = XBot::MatLogger::getLogger("/tmp/PholusPlugin_log");
+
+    /* Intialize/preallocate all variables */
+    _enable_gcomp = true;
+    _robot->getRobotState("home", _q_final);
 
     return true;
 
@@ -55,10 +59,19 @@ void PholusPlugin::on_start(double time)
      * operations that are not rt-safe. */
 
     /* Save the plugin starting time to a class member */
-    _robot->getMotorPosition(_q0);
+    _start_time = time;
 
     /* Save the robot starting config to a class member */
-    _start_time = time;
+    _robot->getMotorPosition(_q0);
+    _robot->getStiffness(_stiffness0);
+    _robot->getDamping(_damping0);
+
+    /* Set the robot in low impedance mode */
+    _robot->setStiffness(_stiffness0 * 0.01);
+    _robot->setDamping(_damping0 * 0.1);
+
+    /* Write new impedance to eCAT buffer */
+    _robot->move();
 }
 
 void PholusPlugin::on_stop(double time)
@@ -67,6 +80,11 @@ void PholusPlugin::on_stop(double time)
      * is sent over the plugin switch port (e.g. 'rosservice call /PholusPlugin_switch false').
      * Since this function is called within the real-time loop, you should not perform
      * operations that are not rt-safe. */
+
+    _robot->setStiffness(_stiffness0);
+    _robot->setDamping(_damping0);
+    _robot->move();
+
 }
 
 
@@ -76,6 +94,44 @@ void PholusPlugin::control_loop(double time, double period)
      * it is stopped.
      * Since this function is called within the real-time loop, you should not perform
      * operations that are not rt-safe. */
+
+    if(command.read(current_command)){
+        if( current_command.str() == "gcomp ON" ){
+            _enable_gcomp = true;
+        }
+        if( current_command.str() == "gcomp OFF" ){
+            _enable_gcomp = false;
+        }
+    }
+
+    /* Define a homing time */
+    double homing_time = 5.0;
+
+    /* Define the normalized time from the plugin start time to the homing time */
+    double tau = (time - _start_time)/homing_time;
+
+    /* Define a variable which goes smoothly from 0 to 1 over the homing time interval */
+    double alpha = tau*tau*tau*(tau*(6*tau-15) + 10);
+
+    /* Force alpha to be <= 1 */
+    alpha = std::min(alpha, 1.0);
+
+    /* Define the position reference */
+    _qref = alpha * (_q_final - _q0) + (1 - alpha) * _q0;
+
+    /* Compute gravity torque */
+     _gcomp.setZero(_robot->getJointNum());
+
+    if(_enable_gcomp) {
+        _robot->model().computeGravityCompensation(_gcomp);
+    }
+
+    /* Send position and torque references */
+    _robot->setPositionReference(_qref);
+    _robot->setEffortReference(_gcomp);
+
+
+    _robot->move();
 
 }
 

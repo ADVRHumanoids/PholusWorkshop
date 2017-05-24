@@ -54,7 +54,10 @@ private:
 
     double _start_time;
 
-    Eigen::VectorXd _q0;
+    Eigen::VectorXd _q0, _stiffness0, _damping0;
+    Eigen::VectorXd _qref, _gcomp, _q_final;
+
+    bool _enable_gcomp;
 
     XBot::MatLogger::Ptr _logger;
 
