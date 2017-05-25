@@ -5,7 +5,7 @@ XBotInterface:
   joint_map_path: "external/PholusWorkshop/configs/centauro/joint_map/centauro_joint_map.yaml"
 
 RobotInterface:
-  framework_name: "XBotRT"
+  framework_name: "ROS"
 
 ModelInterface:
   model_type: "RBDL"
@@ -17,8 +17,8 @@ RobotInterfaceROS:
   subclass_factory_name: "robot_interface_ros"
   control_message_type: "AdvrCommandMessage"
   jointstate_message_type: "AdvrJointStateMessage"
-  ft_topic_names: ["/ft_foot_1", "/ft_foot_2", "/ft_foot_3", "/ft_foot_4"]
-  imu_topic_names: []#["/imu_1_data", "/imu_2_data"]
+  ft_topic_names: []
+  imu_topic_names: []
 
 RobotInterfaceXBotRT:
   subclass_name: "RobotInterfaceXBotRT"
@@ -26,7 +26,7 @@ RobotInterfaceXBotRT:
   subclass_factory_name: "robot_interface_xbot_rt"
 
 XBotRTPlugins:
-  plugins: ["HomingExample", "PholusPlugin"]
+  plugins: ["HomingExample", "PholusPlugin", "hello_xbot"]
   io_plugins: []
 
 
