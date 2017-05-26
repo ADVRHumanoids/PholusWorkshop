@@ -26,7 +26,7 @@ RobotInterfaceXBotRT:
   subclass_factory_name: "robot_interface_xbot_rt"
 
 XBotRTPlugins:
-  plugins: ["HomingExample", "PholusPlugin"]
+  plugins: ["HomingExample", "PholusPlugin","PholusTutorial"]
   io_plugins: []
 
 
